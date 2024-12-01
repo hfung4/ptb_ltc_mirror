@@ -1,0 +1,32 @@
+# General
+keys/*
+.Rproj.user
+.DS_Store
+.Rhistory
+output/
+.databricks/
+.vscode/
+mySyncFolder/
+workspace.code-workspace
+*.pyc
+*.python-version
+.coverage
+.coverage.*
+
+# test coverage
+htmlcov/*
+
+# data
+*.sav
+*.csv
+
+# Environment variables
+.env
+
+# Virtual environment
+.ltc_env/*
+# Package
+tid_bp.egg-info/*
+
+# tox
+.tox/*
