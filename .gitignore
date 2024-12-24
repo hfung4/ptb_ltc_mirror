@@ -1,32 +1,72 @@
-# General
-keys/*
-.Rproj.user
-.DS_Store
-.Rhistory
-output/
+# Common #
+###################
 .databricks/
-.vscode/
-mySyncFolder/
-workspace.code-workspace
-*.pyc
-*.python-version
-.coverage
-.coverage.*
+build/
+dist/
+__pycache__/
+*.egg-info
+.venv/
+scratch/**
+!scratch/README.md
 
-# test coverage
-htmlcov/*
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
 
-# data
-*.sav
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases #
+######################
+*.log
+*.sql
+*.sqlite
+*.pdf
+*.db
+*.coverage
+
+# MLflow (local) #
+######################
+mlruns/*
+
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+
+
+# Others #
+######################
+*.ipynb_checkpoints
 *.csv
+*.pyc
+.idea
+*.pkl
+*.pyc
+*.joblib
+*.databricks
+*.vscode/
 
-# Environment variables
-.env
 
-# Virtual environment
-.ltc_env/*
-# Package
-tid_bp.egg-info/*
-
-# tox
-.tox/*

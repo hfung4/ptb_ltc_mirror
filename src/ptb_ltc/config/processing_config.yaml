@@ -1,0 +1,28 @@
+# Transformation parameters
+IMPUTE_CUSTAGE: 40
+MAX_AGE: 99
+MAX_ASSETS: 1000000
+IMPUTE_YEARSMEMBER: 25
+NON_RESPONSE_RATIO: 4
+
+# Flag to enable undersampling to be applied to the silver data (so that the distribution)
+# of the minority (positive class) is artifically set to 0.20
+PERFORM_INITIAL_DOWNSAMPLING: False
+
+# A minimum percentage threshold below which levels will combined to 'Others'
+RARE_LEVEL_MIN_PCT_THRESHOLD: 3.0
+
+# Defines the sampling strategy to be used by the Random Under Sampling method
+# E.g. 0.5 means that after applying random under samping, the number of samples in the minority class
+# will be 50% of majority class.
+RANDOM_UNDER_SAMPLING_STRATEGY: 0.5
+
+# Oversample the minority class to X proportion of the overall sample
+SMOTE_OVER_SAMPLING_STRATEGY: 0.1 
+
+# Types of SMOTE to try
+SMOTES_TO_TRY:
+  - SMOTE
+  - BorderlineSMOTE
+  - ADASYN
+

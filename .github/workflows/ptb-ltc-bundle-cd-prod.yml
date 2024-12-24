@@ -1,0 +1,41 @@
+# This GitHub workflow deploys Bundle resources (ML resource config and more)
+# defined under resources/*
+# and databricks.yml with prod deployment target configs,
+# when PRs are merged into the release branch
+name: Bundle Deployment for ptb-ltc Prod
+
+on:
+  push:
+    branches:
+      - 'release'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: ./
+
+env:
+  DATABRICKS_TOKEN: ${{ secrets.PROD_WORKSPACE_TOKEN }}
+
+jobs:
+  prod:
+    concurrency: ptb-ltc-prod-bundle-job
+    runs-on:
+      group: linux-runners
+      labels: [self-hosted, linux]
+    container:
+      image: ${{ vars.IMAGE_REGISTRY_PULL }}/docker-mlops/mlops:latest
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: databricks/setup-cli@v0.232.1
+      - name: Validate Bundle For Prod
+        id: validate
+        run: |
+          databricks bundle validate -t prod
+      - name: Deploy Bundle to Prod
+        id: deploy
+        run: |
+          databricks bundle deploy -t prod

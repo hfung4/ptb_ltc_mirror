@@ -1,0 +1,93 @@
+# train.pipeline deployment
+
+# This resource YAML configuration defines resources for a Databricks Asset Bundle.
+# Specifically, a cluster and a "train pipeline" job for end-to-end machine learning workflows,
+# including model training, validation, (and later) deployment.
+
+# TODO: uncomment this section if we can define our own (job) clusters
+
+# Define configuration of a new cluster for the job
+#new_cluster: &new_cluster
+#  new_cluster:
+#    num_workers: 3
+#    spark_version: 15.3.x-cpu-ml-scala2.12
+#    node_type_id: i3.xlarge
+#    data_security_mode: "SINGLE_USER"
+
+# Allow users to read the experiment (use user_group or user_name which must be .thrivent.com emails)
+common_permissions: &permissions
+  permissions:
+    - level: CAN_MANAGE
+      user_name: alex.miao@thrivent.com
+    - level: CAN_MANAGE
+      user_name: henry.fung@thrivent.com
+    - level: CAN_MANAGE
+      user_name: jon.raether@thrivent.com
+    - level: CAN_MANAGE
+      user_name: julia.giesen@thrivent.com
+    - level: CAN_MANAGE
+      user_name: matthew.callicott@thrivent.com
+    - level: CAN_MANAGE
+      user_name: sandra.timm@thrivent.com
+
+# Specify the cluster id for all the tasks in the job
+cluster_config: &cluster_id 1007-164752-keens249
+
+resources:
+  jobs:
+    train_pipeline_job:
+      name: ${bundle.target}-${var.model_name}_train_pipeline
+      # TODO: uncomment this section if we can define our own (job) clusters, and comment out "existing_cluster_id:"" key
+      #job_clusters:
+      #  - job_cluster_key: model_training_job_cluster
+      #    <<: *new_cluster
+      tasks:
+        - task_key: train
+          existing_cluster_id: *cluster_id
+          spark_python_task:
+            python_file: ../src/train.py
+            # command-line argument style
+            parameters:
+              - --env
+              - ${bundle.target}
+              - --experiment_name
+              - ${var.experiment_name}
+              - --git_source_info
+              - url:${bundle.git.origin_url}; branch:${bundle.git.branch}; commit:${bundle.git.commit}
+        - task_key: validate
+          existing_cluster_id: *cluster_id
+          depends_on:
+            - task_key: train
+          spark_python_task:
+            python_file: ../src/validate.py
+            # command-line argument style
+            parameters:
+              # The `run_mode` defines whether model validate.py is enabled or not.
+              # It can be one of the three values:
+              # `disabled` : Do not run the model validate.py script.
+              # `dry_run`  : Run the model validation script. Ignore failed model validation rules and proceed to move
+              #              model to Staging stage (no matter the results).
+              # `enabled`  : Run the model validate.py script. Move model to Staging stage only if all model validation
+              #              rules are passing.
+              # TODO: update run_mode
+              - --run_mode
+              - enabled
+              - --env
+              - ${bundle.target}
+      # Uncomment to set schedule fpr the job (train at the first day of the month at 9am)
+      #schedule:
+      #  quartz_cron_expression: "0 0 9 1 * ?" # first day of the month at 9am
+      #  timezone_id: UTC
+      <<: *permissions
+      # If you want to turn on notifications for this job, please uncomment the below code,
+      # and provide a list of emails to the on_failure argument.
+      #
+      email_notifications:
+        on_failure:
+          - henry.fung@thrivent.com
+      tags:
+        application: ltc
+        owner: Henry Fung
+        scope: ptb
+      queue:
+        enabled: true

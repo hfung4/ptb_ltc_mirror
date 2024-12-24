@@ -1,0 +1,95 @@
+# Feature pipeline deployment
+
+# * This resource configuration file specifies a cluster configuration for running the jobs with defined parameters
+# like Spark version, node type, and security settings. It sets the permissions that allow users to view the resources
+
+# * It specifies a job that performs data processing and feature engineering tasks (aka feature pipeline of the ML project)
+
+# * The job runs on a specified cluster, using dynamic values for input and output paths, and tracking Git source information.
+
+# TODO: uncomment this section if we can define our own (job) clusters
+
+# Define configuration of a new cluster for the job
+#new_cluster: &new_cluster
+#  new_cluster:
+#    num_workers: 3
+#    spark_version: 15.3.x-cpu-ml-scala2.12
+#    node_type_id: i3.xlarge
+#    data_security_mode: "SINGLE_USER"
+
+# Allow users to read the experiment (use user_group or user_name which must be .thrivent.com emails)
+common_permissions: &permissions
+  permissions:
+    - level: CAN_MANAGE
+      user_name: alex.miao@thrivent.com
+    - level: CAN_MANAGE
+      user_name: henry.fung@thrivent.com
+    - level: CAN_MANAGE
+      user_name: jon.raether@thrivent.com
+    - level: CAN_MANAGE
+      user_name: julia.giesen@thrivent.com
+    - level: CAN_MANAGE
+      user_name: matthew.callicott@thrivent.com
+    - level: CAN_MANAGE
+      user_name: sandra.timm@thrivent.com
+
+# Specify the cluster id for all the tasks in the job
+cluster_config: &cluster_id 1007-164752-keens249
+
+resources:
+  jobs:
+    feature_pipeline_job:
+      name: ${bundle.target}-${var.model_name}_feature_pipeline
+      # TODO: uncomment this section if we can define our own (job) clusters, and comment out "existing_cluster_id:"" key
+      #job_clusters:
+      #  - job_cluster_key: write_feature_table_job_cluster
+      #    <<: *new_cluster
+      tasks:
+        # bronze task
+        - task_key: bronze
+          existing_cluster_id: *cluster_id
+          spark_python_task:
+            # Relative to the location of the current yml in local repo
+            python_file: ../src/bronze.py
+        # silver task
+        - task_key: silver
+          depends_on:
+            - task_key: bronze
+          existing_cluster_id: *cluster_id
+          spark_python_task:
+            python_file: ../src/silver.py
+            parameters:
+              # command-line argument style
+              - --train_start_dates
+              - "2022-01-01"
+              - "2022-07-01"
+              - "2023-01-01"
+              - "2023-07-01"
+              - --test_start_dates
+              - "2024-01-01"
+              - --env
+              - ${bundle.target}
+              #- --git_source_info
+              #- url:${bundle.git.origin_url}; branch:${bundle.git.branch}; commit:${bundle.git.commit}
+        # gold task
+        # TODO: once we have UC, specify the input and output tables. The catalog name is ${bundle.target}
+        - task_key: gold
+          depends_on:
+            - task_key: silver
+          existing_cluster_id: *cluster_id
+          spark_python_task:
+            python_file: ../src/gold.py
+            parameters:
+              # command-line argument style
+              - --env
+              - ${bundle.target}
+      tags:
+        application: ltc
+        owner: Henry Fung
+        scope: ptb
+      queue:
+        enabled: true
+      <<: *permissions
+      email_notifications:
+        on_failure:
+          - henry.fung@thrivent.com

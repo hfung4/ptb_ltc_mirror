@@ -1,0 +1,91 @@
+# MLFlow related ----------------------------------------------------------------
+MODEL_NAME: "ptb_ltc"
+
+# Model related ----------------------------------------------------------------
+
+CLIENT_UNIQUE_IDENTIFER: "cifidnbr"
+OUTCOME_VARIABLE: "long_term_care_responder"
+TIME_PERIOD_VARIABLE: "adjusted_effective_date"
+
+SELECTED_FEATURES:
+  - segment
+  - w_hlth_ins_direct_pay_indx
+  - hhetrs_assets
+  - age_segment
+  - w_ins_medsup_buyer_indx
+  - hh_aua
+  - w_hlth_mng_wearable_indx
+  - hhsa
+  - hhprem
+  - etrs_assets
+  - totprem
+  - totsa
+  - w_short_term_loan_indx
+  - ulprem
+  - hhyrspurch
+  - w_aggrgt_zip4_home_value
+  - hhpropassets
+  - w_census_pct_white_collar
+  - pct_cvlsa_totsa
+  - w_census_median_hh_buying_inc
+  - w_census_median_hh_inc
+  - w_census_median_home_value
+  - yearsmember
+  - propassets
+  - netasset
+  - tot_aum_per_yrmbr
+
+# Models to try, must be one of the models whose param space we have implemented
+# See /ptb_ltc/config/core.py for a list of permissible models
+MODELS_TO_TRY:
+  #- KNeighborsClassifier
+  - GaussianNB
+  - DecisionTreeClassifier
+  - LogisticRegression
+  - RandomForestClassifier
+  - XGBClassifier
+  - LGBMClassifier
+  #- MLPClassifier
+
+# Number of hyperparameter optimization trials that are run concurrently across Spark executor nodes
+# REF: https://www.databricks.com/blog/2021/04/15/how-not-to-tune-your-model-with-hyperopt.html
+PARALLELISM: 10
+
+# Timeout seconds for each SparkTrial
+TIMEOUT_SECONDS: 7200
+
+# CV scheme
+
+# Fraction of the data to be used as the test set (aka holdout set)
+TEST_SIZE: 0.3
+# Number of cross validation folds
+N_FOLDS: 2
+# Number of iterations for the hyperparameter search
+N_ITER: 100
+
+# Use SMOTE oversampling and random sampling as steps in the train pipeline
+USE_RESAMPLING_IN_TRAIN_PIPELINE: True
+
+# Fraction of the test set to be further split and be used as the calibration set
+CALIBRATION_SIZE: 0.5
+# Flags to enable calibration
+PERFORM_CALIBRATION: True
+# Calibration method: sigmoid or isotonic
+CALIBRATION_METHOD: sigmoid
+
+# Flag to enable learning curves plotting
+PLOT_LEARNING_CURVES: True
+
+PLOT_SHAP_VALUES: True
+SHAP_THRESHOLD: 5 # threshold for which to filter out outliers (abs)
+SHAP_TYPE: beeswarm # beeswarm, violin, layered_violin, or bar
+
+# Flag to enable to use the best run from only the latest set of CV runs (parent runs)
+SELECT_FROM_LATEST_CV_RUNS: True
+
+# test roc_auc threshold for transitioning models to staging
+MIN_TEST_ROC_AUC: 0.7
+
+# test auprc_lift threshold for transitioning models to staging
+MIN_TEST_AURPC_LIFT: 2
+

@@ -1,0 +1,58 @@
+# The name of the bundle. run `databricks bundle schema` to see the full bundle settings schema.
+bundle:
+  name: ds-ptb-ltc
+
+# Variables to be used in databricks.yml and other resource configuration files.
+variables:
+  experiment_name:
+    description: Experiment name for the model training.
+    default: /Users/${workspace.current_user.userName}/${bundle.target}-ds_optimized_model_ptb_ltc
+  model_name:
+    description: Model name for the model training.
+    default: ptb_ltc
+
+include:
+  # Resources folder contains ML artifact resources for the ML project that defines model and experiment
+  # And workflows resources for the ML project including model training -> validation -> deployment,
+  # feature engineering,  batch inference, quality monitoring, metric refresh, alerts and triggering retraining
+
+  # Definition of Databricks resources
+
+  # Create registered models and experiments and defining permissions for these resources
+  - ./resources/ml-artifacts-resource.yml
+  # Feature pipeline: create a Datbricks job for feature engineering
+  - ./resources/feature-engineering-workflow-resource.yml
+  # Train pipeline: create a Databricks job with the following steps: train, validation (and later, deployment)
+  - ./resources/model-workflow-resource.yml
+  # Inference pipeline: create a Databricks job for batch inference: bronze, silver, gold, predict
+  # NOTE: This pipeline will be modified if we can use feature lookup from feature store
+  - ./resources/batch-inference-workflow-resource.yml
+
+# TODO: uncomment once monitoring inference table has been created
+# - ./resources/monitoring-resource.yml
+
+# Deployment Target specific values for workspace
+targets:
+  dev:
+    # The default target uses 'mode: development' to create a development copy.
+    # - Deployed resources get prefixed with '[dev]'
+    # - Any job schedules and triggers are paused by default.
+    # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
+    default: true
+    workspace:
+      host: https://thrivent-data-office-prod.cloud.databricks.com # replace with a dev workspace once it's available
+
+  staging:
+    workspace:
+      host: https://thrivent-data-office-prod.cloud.databricks.com # replace with a staging workspace once it's available
+
+  prod:
+    mode: production
+    workspace:
+      host: https://thrivent-data-office-prod.cloud.databricks.com # replace with a prod workspace once it's available
+    run_as:
+      user_name: henry.fung@thrivent.com # replace with service principal name
+
+  test:
+    workspace:
+      host: https://thrivent-data-office-prod.cloud.databricks.com # replace with a staging workspace once it's available

@@ -1,0 +1,132 @@
+
+# define the expected schema for the gold table for training
+# column: data type
+TRAIN_SCHEMA:
+  cifidnbr: StringType
+  segment: StringType
+  w_hlth_ins_direct_pay_indx: DoubleType
+  hhetrs_assets: DoubleType
+  age_segment: StringType
+  w_ins_medsup_buyer_indx: DoubleType
+  hh_aua: DoubleType
+  w_hlth_mng_wearable_indx: DoubleType
+  hhsa: DoubleType
+  hhprem: DoubleType
+  etrs_assets: DoubleType
+  totprem: DoubleType
+  totsa: DoubleType
+  w_short_term_loan_indx: DoubleType
+  ulprem: DoubleType
+  hhyrspurch: DoubleType
+  w_aggrgt_zip4_home_value: DoubleType
+  hhpropassets: DoubleType
+  w_census_pct_white_collar: DoubleType
+  pct_cvlsa_totsa: DoubleType
+  w_census_median_hh_buying_inc: DoubleType
+  w_census_median_hh_inc: DoubleType
+  w_census_median_home_value: DoubleType
+  yearsmember: DoubleType
+  propassets: DoubleType
+  netasset: DoubleType
+  tot_aum_per_yrmbr: DoubleType
+  long_term_care_responder: IntegerType
+  adjusted_effective_date: StringType
+  set_type: StringType
+
+# define the expected schema for the gold table for serving
+SERVING_SCHEMA:
+  cifidnbr: StringType
+  segment: StringType
+  w_hlth_ins_direct_pay_indx: DoubleType
+  hhetrs_assets: DoubleType
+  age_segment: StringType
+  w_ins_medsup_buyer_indx: DoubleType
+  hh_aua: DoubleType
+  w_hlth_mng_wearable_indx: DoubleType
+  hhsa: DoubleType
+  hhprem: DoubleType
+  etrs_assets: DoubleType
+  totprem: DoubleType
+  totsa: DoubleType
+  w_short_term_loan_indx: DoubleType
+  ulprem: DoubleType
+  hhyrspurch: DoubleType
+  w_aggrgt_zip4_home_value: DoubleType
+  hhpropassets: DoubleType
+  w_census_pct_white_collar: DoubleType
+  pct_cvlsa_totsa: DoubleType
+  w_census_median_hh_buying_inc: DoubleType
+  w_census_median_hh_inc: DoubleType
+  w_census_median_home_value: DoubleType
+  yearsmember: DoubleType
+  propassets: DoubleType
+  netasset: DoubleType
+  tot_aum_per_yrmbr: DoubleType
+  adjusted_effective_date: StringType
+
+
+# define the expected ranges for numerical columns
+# column: [min, max]
+NUMERICAL_RANGES:
+  w_hlth_ins_direct_pay_indx: [0, 9]
+  w_ins_medsup_buyer_indx: [0, 9]
+  hh_aua: [0, 1]
+  w_hlth_mng_wearable_indx: [0, 9]
+  w_short_term_loan_indx: [0, 9]
+  w_census_pct_white_collar: [0, 100]
+  pct_cvlsa_totsa: [0, 1]
+  yearsmember: [0, 100]
+
+# define the available options for categorical columns in the gold data for training
+# column: 
+#  - option 1
+#  - option 2
+TRAIN_CATEGORICAL_OPTIONS:
+  segment: 
+    - 'MIDDLE MARKET PRERETIRED'
+    - 'Others'
+    - 'INSUFFICIENT INCOME'
+    - 'MIDDLE MARKET RETIRED COUPLES'
+    - 'AFFLUENT FAMILIES'
+    - 'MIDDLE MARKET FAMILIES'
+    - 'MIDDLE MARKET RETIRED SINGLES'
+    - 'AFFLUENT PRERETIRED'
+    - 'AFFLUENT RETIRED SINGLES'
+    - 'MIDDLE MARKET SINGLES AND COUP'
+    - 'AFFLUENT RETIRED COUPLES'
+    - null
+  age_segment: 
+    - 'E LeadBoomers'
+    - 'B Millennial'
+    - 'D TailBoomers'
+    - 'F Seniors'
+    - 'A GenZ'
+    - 'C GenX'
+    - null
+  set_type:
+    - 'train'
+    - 'test'
+
+# define the available options for categorical columns in the gold data for serving
+SERVING_CATEGORICAL_OPTIONS:
+  segment: 
+    - 'MIDDLE MARKET PRERETIRED'
+    - 'Others'
+    - 'INSUFFICIENT INCOME'
+    - 'MIDDLE MARKET RETIRED COUPLES'
+    - 'AFFLUENT FAMILIES'
+    - 'MIDDLE MARKET FAMILIES'
+    - 'MIDDLE MARKET RETIRED SINGLES'
+    - 'AFFLUENT PRERETIRED'
+    - 'AFFLUENT RETIRED SINGLES'
+    - 'MIDDLE MARKET SINGLES AND COUP'
+    - 'AFFLUENT RETIRED COUPLES'
+    - null
+  age_segment: 
+    - 'E LeadBoomers'
+    - 'B Millennial'
+    - 'D TailBoomers'
+    - 'F Seniors'
+    - 'A GenZ'
+    - 'C GenX'
+    - null

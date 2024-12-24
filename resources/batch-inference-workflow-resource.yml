@@ -1,0 +1,92 @@
+# Inference pipeline deployment
+
+# This YAML file configures a Databricks job within an Asset Bundle for a batch inference workflow:
+# * (Later on) A new job cluster is created with specific settings to run the job.
+# * A job (inference_pipeline_job) is defined to perform batch inference tasks. It executes a
+# sequence of Python scripts that load a trained model and perform inference on new data.
+
+# The YAML configuration ensures that the job runs in a controlled environment with the necessary
+# resources and permissions, automating the batch inference process and tracking the source code version.
+
+# TODO: uncomment this section if we can define our own (job) clusters
+
+# Define configuration of a new cluster for the job
+#new_cluster: &new_cluster
+#  new_cluster:
+#    num_workers: 3
+#    spark_version: 15.3.x-cpu-ml-scala2.12
+#    node_type_id: i3.xlarge
+#    data_security_mode: "SINGLE_USER"
+
+# Allow users to read the experiment (use user_group or user_name which must be .thrivent.com emails)
+common_permissions: &permissions
+  permissions:
+    - level: CAN_MANAGE
+      user_name: alex.miao@thrivent.com
+    - level: CAN_MANAGE
+      user_name: henry.fung@thrivent.com
+    - level: CAN_MANAGE
+      user_name: jon.raether@thrivent.com
+    - level: CAN_MANAGE
+      user_name: julia.giesen@thrivent.com
+    - level: CAN_MANAGE
+      user_name: matthew.callicott@thrivent.com
+    - level: CAN_MANAGE
+      user_name: sandra.timm@thrivent.com
+
+# Specify the cluster id for all the tasks in the job
+cluster_config: &cluster_id 1007-164752-keens249
+
+resources:
+  jobs:
+    inference_pipeline_job:
+      name: ${bundle.target}-${var.model_name}_inference_pipeline
+      tasks:
+        - task_key: bronze
+          existing_cluster_id: *cluster_id
+          spark_python_task:
+            python_file: ../src/bronze.py
+        - task_key: silver
+          depends_on:
+            - task_key: bronze
+          existing_cluster_id: *cluster_id
+          spark_python_task:
+            python_file: ../src/silver.py
+            parameters:
+              - --serving_start_dates
+              - "2024-07-01"
+              - --env
+              - ${bundle.target}
+        - task_key: gold
+          depends_on:
+            - task_key: silver
+          existing_cluster_id: *cluster_id
+          spark_python_task:
+            python_file: ../src/gold.py
+            parameters:
+              - --env
+              - ${bundle.target}
+        - task_key: predict
+          depends_on:
+            - task_key: gold
+          existing_cluster_id: *cluster_id
+          spark_python_task:
+            python_file: ../src/predict.py
+            parameters:
+              - --env
+              - ${bundle.target}
+            # TODO: specify input and output tables, and model name
+            #- --git_source_info
+            #- url:${bundle.git.origin_url}; branch:${bundle.git.branch}; commit:${bundle.git.commit}
+      <<: *permissions
+      # If you want to turn on notifications for this job, please uncomment the below code,
+      # and provide a list of emails to the on_failure argument.
+      email_notifications:
+        on_failure:
+          - henry.fung@thrivent.com
+      tags:
+        application: ltc
+        owner: Henry Fung
+        scope: ptb
+      queue:
+        enabled: true

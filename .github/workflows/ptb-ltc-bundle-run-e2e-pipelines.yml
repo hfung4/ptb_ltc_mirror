@@ -1,0 +1,68 @@
+name: Run end-to-end Databricks jobs
+
+on:
+  workflow_dispatch: # Allows manual triggering
+    inputs:
+      environment:
+        description: 'Environment to run the end-to-end Databricks jobs'
+        default: 'prod'
+        type: choice
+        options:
+          - staging
+          - prod
+  #schedule: # Optional, for scheduled runs
+  #  - cron: '0 0 * * *' # Runs daily at midnight
+
+defaults:
+  run:
+    working-directory: ./
+
+env:
+  # Defining two environment variables for the Databricks workspace tokens
+  # to be used in this yaml (see below)
+  STAGING_WORKSPACE_TOKEN: ${{ secrets.STAGING_WORKSPACE_TOKEN }}
+  PROD_WORKSPACE_TOKEN: ${{ secrets.PROD_WORKSPACE_TOKEN }}
+  environment: ${{ inputs.environment || 'prod' }}  # Default to 'prod' if not manually set
+
+concurrency: ptb-ltc-end-to-end-pipeline-run
+
+jobs:
+  run-end-to-end-databricks-jobs:
+    runs-on:
+      group: linux-runners
+      labels: [self-hosted, linux]
+    container:
+      image: ${{ vars.IMAGE_REGISTRY_PULL }}/docker-mlops/mlops:latest
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - uses: databricks/setup-cli@v0.221.0
+      - name: Print environment 
+        run: |
+          echo "Environment: ${{ inputs.environment || 'prod' }}"  # defaults to 'prod' if environment not set
+      - name: Run Feature Engineering Workflow for the Deployment Target in the Target Workspace
+        id: feature_pipeline
+        env:
+          DATABRICKS_TOKEN: ${{ inputs.environment == 'staging' && env.STAGING_WORKSPACE_TOKEN || env.PROD_WORKSPACE_TOKEN }}
+        run: |
+          databricks bundle run feature_pipeline_job -t ${{ inputs.environment || 'prod' }}
+      - name: Run Training Workflow for the Deployment Target in the Target Workspace
+        id: training
+        env:
+          DATABRICKS_TOKEN: ${{ inputs.environment == 'staging' && env.STAGING_WORKSPACE_TOKEN || env.PROD_WORKSPACE_TOKEN }}
+        run: |
+          databricks bundle run train_pipeline_job -t ${{ inputs.environment || 'prod' }}
+      - name: Run Inference Workflow the the Deployment Target in the Target Workspace
+        id: inference
+        env:
+          DATABRICKS_TOKEN: ${{ inputs.environment == 'staging' && env.STAGING_WORKSPACE_TOKEN || env.PROD_WORKSPACE_TOKEN }}
+        run: |
+          databricks bundle run inference_pipeline_job -t ${{ inputs.environment || 'prod' }}
+        
+      
+ 
+    

@@ -1,0 +1,51 @@
+# Model and Optimized Model Experiment deployment
+
+# This YAML file is used in the Databricks Asset Bundle to create and configure assets,
+# specifically models and experiments, while defining access permissions for these resources.
+# It specifies key properties for each asset, such as the model's name, description.
+
+# Allow users to read the experiment (use user_group or user_name which must be .thrivent.com emails)
+common_permissions: &permissions
+  permissions:
+    - level: CAN_MANAGE
+      user_name: alex.miao@thrivent.com
+    - level: CAN_MANAGE
+      user_name: henry.fung@thrivent.com
+    - level: CAN_MANAGE
+      user_name: jon.raether@thrivent.com
+    - level: CAN_MANAGE
+      user_name: julia.giesen@thrivent.com
+    - level: CAN_MANAGE
+      user_name: matthew.callicott@thrivent.com
+    - level: CAN_MANAGE
+      user_name: sandra.timm@thrivent.com
+
+  # TODO: Uncomment if we can create user group in Databricks
+  #common_permissions: &permissions
+  #  permissions:
+  #    - level: CAN_READ
+  #      group_name: ds_team_1
+
+# TODO: uncomment this when we have Unity Catalog
+# Allow users to execute models in Unity Catalog
+# grants: &grants
+#  grants:
+#    - privileges:
+#        - EXECUTE
+#      principal: account users
+
+# Defines model and experiments
+# resources:
+#  registered_models:
+#      model:
+#        name: ${var.model_name}
+#        catalog_name: ${bundle.target}
+#        schema_name: ptb_ltc
+#        comment: Registered model in Unity Catalog for the "ptb_ltc" ML Project for ${bundle.target} deployment target.
+#        <<: *grants
+
+resources:
+  experiments:
+    experiment:
+      name: ${var.experiment_name}
+      <<: *permissions
